@@ -6,8 +6,10 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Net.Mail;
+using System.Net.NetworkInformation;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Policy;
 using System.Text;
@@ -15,6 +17,12 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using static System.Net.Mime.MediaTypeNames;
+using System.Diagnostics;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Spreadsheet;
+using DocumentFormat.OpenXml;
+using Font = DocumentFormat.OpenXml.Spreadsheet.Font;
+using Text = DocumentFormat.OpenXml.Spreadsheet.Text;
 
 
 
@@ -29,19 +37,17 @@ namespace Praktikum_01
         {
             InitializeComponent(); 
             
-
-            cb_bundesland.DropDownStyle = ComboBoxStyle.DropDown;   // allow typing
+            cb_bundesland.DropDownStyle = ComboBoxStyle.DropDown;
             cb_geschlecht.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
             cb_geschlecht.AutoCompleteSource = AutoCompleteSource.ListItems;
             cb_geschlecht.TextChanged += ComboBox_ValidateTypedText;
 
-            cb_bundesland.DropDownStyle = ComboBoxStyle.DropDown;   // allow typing
+            cb_bundesland.DropDownStyle = ComboBoxStyle.DropDown;
             cb_bundesland.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
             cb_bundesland.AutoCompleteSource = AutoCompleteSource.ListItems;
             cb_bundesland.TextChanged += ComboBox_ValidateTypedText;
-            // Format wechseln
-            // inside Form_Load or constructor
-            mtb_geburtstagdatum.Mask = "00/00/0000";
+
+            mtb_geburtstagdatum.Mask = "00/00/0000"; // funkzioniert mit '.' als Maske net
             mtb_geburtstagdatum.Culture = new CultureInfo("de-DE");
             mtb_geburtstagdatum.TextMaskFormat = MaskFormat.IncludePromptAndLiterals;
             mtb_geburtstagdatum.PromptChar = '_';
@@ -54,6 +60,11 @@ namespace Praktikum_01
             LoadData();
 
             AttachValidationEvents(this);
+
+            dgv_Personnen.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+            dgv_Personnen.MultiSelect = true;   // fuer multi zeile export
+            dgv_Personnen.RowHeadersVisible = false;
+
 
         }
 
@@ -105,7 +116,7 @@ namespace Praktikum_01
         }
 
 
-        private void HighlightFelder(Control c)
+        private void HighlightFelder(System.Windows.Forms.Control c)
         {
             if (isClearing)
                 return;
@@ -113,32 +124,32 @@ namespace Praktikum_01
             if (c is TextBox tb)
             {
                 if (string.IsNullOrWhiteSpace(tb.Text))
-                    tb.BackColor = Color.Yellow;
+                    tb.BackColor = System.Drawing.Color.Yellow;
                 else
-                    tb.BackColor = Color.White;
+                    tb.BackColor = System.Drawing.Color.White;
             }
             else if (c is ComboBox cb)
             {
                 if (cb.DropDownStyle == ComboBoxStyle.DropDownList)
                 {
-                    cb.BackColor = (cb.SelectedIndex < 0) ? Color.Yellow : Color.White;
+                    cb.BackColor = (cb.SelectedIndex < 0) ? System.Drawing.Color.Yellow : System.Drawing.Color.White;
                 }
                 else
                 {
                     cb.BackColor = string.IsNullOrWhiteSpace(cb.Text)
-                                   ? Color.Yellow
-                                   : Color.White;
+                                   ? System.Drawing.Color.Yellow
+                                   : System.Drawing.Color.White;
                 }
             }
             if (mtb_geburtstagdatum.Text.Contains("_"))
-                mtb_geburtstagdatum.BackColor = Color.Yellow;
+                mtb_geburtstagdatum.BackColor = System.Drawing.Color.Yellow;
             else
-                mtb_geburtstagdatum.BackColor = Color.White;
+                mtb_geburtstagdatum.BackColor = System.Drawing.Color.White;
         }
 
-        private void AttachValidationEvents(Control parent)
+        private void AttachValidationEvents(System.Windows.Forms.Control parent)
         {
-            foreach (Control c in parent.Controls)
+            foreach (System.Windows.Forms.Control c in parent.Controls)
             {
                 if (c is TextBox tb)
                 {
@@ -184,18 +195,18 @@ namespace Praktikum_01
 
         private void TextBox_TextChanged(object sender, EventArgs e)
         {
-            HighlightFelder((Control)sender);
+            HighlightFelder((System.Windows.Forms.Control)sender);
         }
 
         private void ComboBox_Changed(object sender, EventArgs e)
         {
-            HighlightFelder((Control)sender);
+            HighlightFelder((System.Windows.Forms.Control)sender);
         }
-        private bool AllFieldsFilled(Control parent)
+        private bool AllFieldsFilled(System.Windows.Forms.Control parent)
         {
             bool allFilled = true;
 
-            foreach (Control c in parent.Controls)
+            foreach (System.Windows.Forms.Control c in parent.Controls)
             {
                 // TEXTBOX
                 if (c is TextBox tb)
@@ -205,23 +216,23 @@ namespace Praktikum_01
                     {
                         if (string.IsNullOrWhiteSpace(tb.Text))
                         {
-                            tb.BackColor = Color.Yellow;  // wenn leer
+                            tb.BackColor = System.Drawing.Color.Yellow;  // wenn leer
                             allFilled = false;
                         }
                         else if (!Regex.IsMatch(tb.Text.Trim(), @"^[^@\s]+@[^@\s]+\.[A-Za-z]{2,}$"))
                         {
-                            tb.BackColor = Color.Red;     // invalid format
-                            tb.ForeColor = Color.White;
+                            tb.BackColor = System.Drawing.Color.Red;     // invalid format
+                            tb.ForeColor = System.Drawing.Color.White;
                             allFilled = false;
                         }
                         else
                         {
-                            tb.ForeColor = Color.Black;
-                            tb.BackColor = Color.White;   // valid
+                            tb.ForeColor = System.Drawing.Color.Black;
+                            tb.BackColor = System.Drawing.Color.White;   // valid
                         }
 
                         continue; // uberspringen normale textbox validation
-                    }
+                      }
 
                     // NORMALE textboxes
                     HighlightFelder(tb);
@@ -284,8 +295,8 @@ namespace Praktikum_01
             if (geburtsdatum.Date > DateTime.Today.AddYears(-alter)) alter--;
             lbl_alterberechnen.Text = Convert.ToString(alter);
 
-            // Beispiel: Mindestalter 14
-            return alter >= 14;
+            //Mindestalter 14
+            return alter >= 18;
         }
 
 
@@ -321,18 +332,17 @@ namespace Praktikum_01
         {
             int cursor = tb_telefonnummer.SelectionStart;
 
-            // original text
-            string input = tb_telefonnummer.Text;
+            string eingabe = tb_telefonnummer.Text;
 
-            // keep + and digits only
+            // Erlaubt nur + und 0-9
             string cleaned = "";
-            foreach (char c in input)
+            foreach (char c in eingabe)
             {
                 if (char.IsDigit(c) || (c == '+' && cleaned.Length == 0))
                     cleaned += c;
             }
 
-            // group digits into readable blocks
+            // fuer lesbarkeit
             string formatted = "";
             int count = 0;
 
@@ -341,7 +351,7 @@ namespace Praktikum_01
                 formatted += c;
                 count++;
 
-                // insert space every 3 digits (except after +49)
+                // Leerzeichen einfuegen nach 3 Zeichen
                 if (char.IsDigit(c))
                 {
                     if (count > 2 && count % 3 == 0 && count < cleaned.Length)
@@ -349,7 +359,7 @@ namespace Praktikum_01
                 }
             }
 
-            // only update if formatting changed text
+            // nr aktualisieren, wenn sich die Formatierung des Textes geändert hat
             if (formatted != tb_telefonnummer.Text)
             {
                 tb_telefonnummer.Text = formatted;
@@ -443,9 +453,9 @@ namespace Praktikum_01
                 dgv_Personnen.DataSource = dt;
             }
         }
-        private void NewTextBoxes(Control parent)
+        private void NewTextBoxes(System.Windows.Forms.Control parent)
         {
-            foreach (Control ctl in parent.Controls)
+            foreach (System.Windows.Forms.Control ctl in parent.Controls)
             {
                 if (ctl is TextBox tb)
                         tb.Clear();        // or tb.Text = ""
@@ -454,9 +464,9 @@ namespace Praktikum_01
                 tb_suchen.Text = "0";
             }
         }
-        private void ClearTextBoxes(Control parent)
+        private void ClearTextBoxes(System.Windows.Forms.Control parent)
         {
-            foreach (Control ctl in parent.Controls)
+            foreach (System.Windows.Forms.Control ctl in parent.Controls)
             {
                 if (ctl is TextBox tb)
                 {
@@ -515,22 +525,22 @@ namespace Praktikum_01
             LoadData();
         }
 
-        private void ResetBackcolors(Control parent)
+        private void ResetBackcolors(System.Windows.Forms.Control parent)
         {
-            foreach (Control c in parent.Controls)
+            foreach (System.Windows.Forms.Control c in parent.Controls)
             {
                 if (c is TextBox || c is ComboBox)
-                    c.BackColor = Color.White;
+                    c.BackColor = System.Drawing.Color.White;
 
                 if (c.HasChildren)
                     ResetBackcolors(c);
-                mtb_geburtstagdatum.BackColor = Color.White;
+                mtb_geburtstagdatum.BackColor = System.Drawing.Color.White;
             }
         }
 
         private void EnableInputs()
         {
-            foreach (Control c in panel1.Controls)
+            foreach (System.Windows.Forms.Control c in panel1.Controls)
             {
                 if (c == tb_suchen)
                     continue;
@@ -540,7 +550,7 @@ namespace Praktikum_01
 
         private void DisableInputs()
         {
-            foreach (Control c in panel1.Controls)
+            foreach (System.Windows.Forms.Control c in panel1.Controls)
             {
                 if (c == btn_neu || c == btn_speichern)
                     continue;
@@ -673,7 +683,158 @@ namespace Praktikum_01
             }
         }
 
+        void export_csv(string file, DataGridView grid)
+        {
+            // tempfile zu exportieren
+            string tempFile = Path.Combine(Path.GetTempPath(), "grid_export_" + Guid.NewGuid().ToString() + ".csv");
 
+            using (StreamWriter csv = new StreamWriter(tempFile, false, Encoding.UTF8))
+            {
+                // Header Zeil
+                List<string> headers = new List<string>();
+                foreach (DataGridViewColumn col in grid.Columns)
+                    headers.Add(EscapeCsv(col.HeaderText));
+                csv.WriteLine(string.Join(",", headers));
+
+                // Data Zeilen
+                foreach (DataGridViewRow row in grid.Rows)
+                {
+                    if (row.IsNewRow) continue;
+
+                    List<string> cells = new List<string>();
+                    foreach (DataGridViewCell cell in row.Cells)
+                        cells.Add(EscapeCsv(cell.Value?.ToString() ?? ""));
+
+                    csv.WriteLine(string.Join(",", cells));
+                }
+            }
+            string libreOfficePath = @"C:\Program Files\LibreOffice\program\scalc.exe";
+
+            if (File.Exists(libreOfficePath))
+            {
+                Process.Start(new ProcessStartInfo()
+                {
+                    FileName = libreOfficePath,
+                    Arguments = $"\"{tempFile}\"",
+                    UseShellExecute = false
+                });
+            }
+            else
+            {
+                Process.Start(new ProcessStartInfo()
+                {
+                    FileName = tempFile,
+                    UseShellExecute = true
+                });
+            }
+        }
+        // Fluchthelfer
+        string EscapeCsv(string input)
+        {
+            if (input.Contains("\""))
+                input = input.Replace("\"", "\"\"");
+            if (input.Contains(",") || input.Contains("\n") || input.Contains("\r"))
+                input = $"\"{input}\"";
+            return input;
+        }
+
+        public void export_xlsx(DataGridView grid, bool onlySelected)
+        {
+            List<DataGridViewRow> rowsToExport = new List<DataGridViewRow>();
+
+            if (onlySelected)
+            {
+                if (grid.SelectedRows.Count == 0)
+                {
+                    MessageBox.Show("Bitte wählen Sie mindestens eine Zeile aus.");
+                    return;
+                }
+
+                // Add selected rows in display order
+                rowsToExport.AddRange(grid.SelectedRows.Cast<DataGridViewRow>().OrderBy(r => r.Index));
+            }
+            else
+            {
+                // Add all rows except the "new" one
+                foreach (DataGridViewRow r in grid.Rows)
+                {
+                    if (!r.IsNewRow)
+                        rowsToExport.Add(r);
+                }
+            }
+
+            string file = Path.Combine(Path.GetTempPath(),
+                                       "Export_" + Guid.NewGuid() + ".xlsx");
+
+            using (SpreadsheetDocument doc =
+                SpreadsheetDocument.Create(file, DocumentFormat.OpenXml.SpreadsheetDocumentType.Workbook))
+            {
+                WorkbookPart wbPart = doc.AddWorkbookPart();
+                wbPart.Workbook = new Workbook();
+
+                // STYLES (bold header)
+                WorkbookStylesPart styles = wbPart.AddNewPart<WorkbookStylesPart>();
+                styles.Stylesheet = new Stylesheet(
+                    new Fonts(new Font(), new Font(new Bold())),   // default + bold
+                    new Fills(new Fill()),
+                    new Borders(new Border()),
+                    new CellFormats(
+                        new CellFormat(),                 // default
+                        new CellFormat() { FontId = 1 }   // bold
+                    )
+                );
+                styles.Stylesheet.Save();
+
+                WorksheetPart wsPart = wbPart.AddNewPart<WorksheetPart>();
+                SheetData sheetData = new SheetData();
+                wsPart.Worksheet = new Worksheet(sheetData);
+
+                Sheets sheets = doc.WorkbookPart.Workbook.AppendChild(new Sheets());
+                sheets.Append(new Sheet()
+                {
+                    Id = doc.WorkbookPart.GetIdOfPart(wsPart),
+                    SheetId = 1,
+                    Name = onlySelected ? "Auswahl" : "Alle"
+                });
+
+                // HEADER ROW
+                Row header = new Row();
+                foreach (DataGridViewColumn col in grid.Columns)
+                    header.Append(CreateTextCell(col.HeaderText, bold: true));
+                sheetData.Append(header);
+
+                // DATA ROWS
+                foreach (DataGridViewRow row in rowsToExport)
+                {
+                    Row r = new Row();
+                    foreach (DataGridViewCell cell in row.Cells)
+                        r.Append(CreateTextCell(cell.Value?.ToString() ?? ""));
+                    sheetData.Append(r);
+                }
+            }
+
+            // OPEN AUTOMATICALLY
+            Process.Start(new ProcessStartInfo()
+            {
+                FileName = file,
+                UseShellExecute = true
+            });
+        }
+
+        /// Helper
+        private Cell CreateTextCell(string text, bool bold = false)
+        {
+            Cell cell = new Cell
+            {
+                DataType = CellValues.InlineString,
+                InlineString = new InlineString(new Text(text))
+            };
+
+            if (bold)
+                cell.StyleIndex = 1;
+
+            return cell;
+        }
 
 
         private void btn_speichern_Click(object sender, EventArgs e)
@@ -686,13 +847,13 @@ namespace Praktikum_01
                 {
                     con.Open();
                     lbl_verbindungstatus.Text = ("Verbindung erfolgreich!");
-                    lbl_verbindungstatus.ForeColor = Color.Green;
+                    lbl_verbindungstatus.ForeColor = System.Drawing.Color.Green;
                 }
             }
             catch (Exception ex)
             {
                 lbl_verbindungstatus.Text = ("Fehler: " + ex.Message);
-                lbl_verbindungstatus.ForeColor = Color.Red;
+                lbl_verbindungstatus.ForeColor = System.Drawing.Color.Red;
             }
 
             if (btn_speichern.Text == "Aktualisieren")
@@ -728,12 +889,12 @@ namespace Praktikum_01
                 if (id == 0)
                 {
                     InsertPerson();
-                    //btn_neu.PerformClick();
+                    btn_neu.PerformClick();
                 }
                 else
                 {
                     UpdatePerson(id);
-                    //btn_neu.PerformClick();
+                    btn_neu.PerformClick();
                 }
                 LoadData();  // reload grid
             }
@@ -799,18 +960,7 @@ namespace Praktikum_01
             btn_speichern.Text = "Aktualisieren";
 
         }
-        // doppelclick um die daten in felder zu ueberschreiben
-        /*
-        private void tb_DoubleClick(object sender, EventArgs e)
-        {
-            TextBox tb = sender as TextBox;
-            if (tb != null)
-            {
-                string value = tb.Text;
-                dgv_Personnen.CurrentCell.Value = value;
-            }
-        }*/
-        // gleiche class aber fuer ComboBox
+        // uebersc
         private void cb_MouseDoubleClick(object sender, MouseEventArgs e)
         {
             ComboBox cb = sender as ComboBox;
@@ -842,29 +992,7 @@ namespace Praktikum_01
             if (!char.IsDigit(e.KeyChar) && e.KeyChar != '+' && e.KeyChar != ' ' && e.KeyChar != '(' && e.KeyChar != ')')
                 e.Handled = true;
         }
-        /*
-        private void dgv_Personnen_CellClick(object sender, DataGridViewCellEventArgs e)
-        {
-            // column headers
-            if (e.RowIndex < 0)   // header
-                return;
 
-            if (e.RowIndex >= dgv_Personnen.Rows.Count)  // mehr als gibt
-                return;
-
-            // "neue spalte" (Leere Feld ganz unten)
-            if (dgv_Personnen.Rows[e.RowIndex].IsNewRow)
-                return;
-
-            // Sicherheit ist wichtig
-            var cell = dgv_Personnen.Rows[e.RowIndex].Cells["ID"].Value;
-
-            if (cell == null)     // keine value in  ID Felder
-                return;
-
-            tb_suchen.Text = cell.ToString();
-        }
-        */
         private void tb_name_KeyPress(object sender, KeyPressEventArgs e)
         { 
             if (char.IsControl(e.KeyChar))
@@ -965,7 +1093,7 @@ namespace Praktikum_01
                 return;
             }
 
-            // Split: day, month, year
+            // teilt: day, month, year
             string[] matrix = new string[]
             {
                 geburtsdatum.Day.ToString(),
@@ -992,27 +1120,41 @@ namespace Praktikum_01
 
             if (jahre > 100 || jahre < 0)
             {
-                lbl_alterberechnen.BackColor = Color.Red;
-                lbl_alterberechnen.ForeColor = Color.White;
+                lbl_alterberechnen.BackColor = System.Drawing.Color.Red;
+                lbl_alterberechnen.ForeColor = System.Drawing.Color.White;
                 lbl_alterberechnen.Text = "Ungültige Eingabe!";
             }
             else if (jahre < 18)
             {
-                lbl_alterberechnen.BackColor = Color.Yellow;
-                lbl_alterberechnen.ForeColor = Color.Black;
+                lbl_alterberechnen.BackColor = System.Drawing.Color.Yellow;
+                lbl_alterberechnen.ForeColor = System.Drawing.Color.Black;
                 lbl_alterberechnen.Text = $"{jahre} Jahre {monate} Monate";
             }
             else
             {
-                lbl_alterberechnen.BackColor = Color.Green;
-                lbl_alterberechnen.ForeColor = Color.White;
+                lbl_alterberechnen.BackColor = System.Drawing.Color.Green;
+                lbl_alterberechnen.ForeColor = System.Drawing.Color.White;
                 lbl_alterberechnen.Text = $"{jahre} Jahre {monate} Monate";
-            }
-
-            
-
-            
+            } 
         }
 
+        private void aktualisierenToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            LoadData();
+        }
+
+        private void cSVToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            export_csv("test", dgv_Personnen);
+        }
+
+        private void xLSXToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            export_xlsx(dgv_Personnen, onlySelected: false);
+        }
+        private void eXLSXToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            export_xlsx(dgv_Personnen, onlySelected: true);
+        }
     }
 }

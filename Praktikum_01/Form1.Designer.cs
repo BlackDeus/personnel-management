@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.lbl_andrede = new System.Windows.Forms.Label();
             this.lbl_name = new System.Windows.Forms.Label();
             this.lbl_vorname = new System.Windows.Forms.Label();
@@ -64,9 +65,18 @@
             this.btn_neu = new System.Windows.Forms.Button();
             this.lbl_verbindungstatus = new System.Windows.Forms.Label();
             this.dgv_Personnen = new System.Windows.Forms.DataGridView();
+            this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.exportierenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.aktualisierenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panel2 = new System.Windows.Forms.Panel();
+            this.nurAusgewaehlteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.eCSVToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.eXLSXToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.cSVToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.xLSXToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgv_Personnen)).BeginInit();
+            this.contextMenuStrip1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -224,7 +234,6 @@
             this.tb_name.Name = "tb_name";
             this.tb_name.Size = new System.Drawing.Size(100, 20);
             this.tb_name.TabIndex = 14;
-            //this.tb_name.DoubleClick += new System.EventHandler(this.tb_DoubleClick);
             this.tb_name.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.tb_name_KeyPress);
             // 
             // tb_vorname
@@ -233,7 +242,6 @@
             this.tb_vorname.Name = "tb_vorname";
             this.tb_vorname.Size = new System.Drawing.Size(100, 20);
             this.tb_vorname.TabIndex = 15;
-            //this.tb_vorname.DoubleClick += new System.EventHandler(this.tb_DoubleClick);
             this.tb_vorname.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.tb_name_KeyPress);
             // 
             // cb_geschlecht
@@ -269,7 +277,6 @@
             this.tb_strasse.Name = "tb_strasse";
             this.tb_strasse.Size = new System.Drawing.Size(100, 20);
             this.tb_strasse.TabIndex = 18;
-            //this.tb_strasse.DoubleClick += new System.EventHandler(this.tb_DoubleClick);
             this.tb_strasse.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.tb_name_KeyPress);
             // 
             // tb_hausnr
@@ -278,7 +285,6 @@
             this.tb_hausnr.Name = "tb_hausnr";
             this.tb_hausnr.Size = new System.Drawing.Size(100, 20);
             this.tb_hausnr.TabIndex = 19;
-           // this.tb_hausnr.DoubleClick += new System.EventHandler(this.tb_DoubleClick);
             // 
             // tb_plz
             // 
@@ -287,7 +293,6 @@
             this.tb_plz.Name = "tb_plz";
             this.tb_plz.Size = new System.Drawing.Size(100, 20);
             this.tb_plz.TabIndex = 20;
-           // this.tb_plz.DoubleClick += new System.EventHandler(this.tb_DoubleClick);
             this.tb_plz.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.tb_plz_KeyPress);
             // 
             // tb_ort
@@ -296,7 +301,6 @@
             this.tb_ort.Name = "tb_ort";
             this.tb_ort.Size = new System.Drawing.Size(100, 20);
             this.tb_ort.TabIndex = 21;
-            //this.tb_ort.DoubleClick += new System.EventHandler(this.tb_DoubleClick);
             this.tb_ort.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.tb_name_KeyPress);
             // 
             // cb_bundesland
@@ -334,7 +338,6 @@
             this.tb_email.Name = "tb_email";
             this.tb_email.Size = new System.Drawing.Size(100, 20);
             this.tb_email.TabIndex = 23;
-            //this.tb_email.DoubleClick += new System.EventHandler(this.tb_DoubleClick);
             // 
             // tb_telefonnummer
             // 
@@ -344,7 +347,6 @@
             this.tb_telefonnummer.Size = new System.Drawing.Size(100, 20);
             this.tb_telefonnummer.TabIndex = 24;
             this.tb_telefonnummer.TextChanged += new System.EventHandler(this.tb_telefonnummer_TextChanged);
-            //this.tb_telefonnummer.DoubleClick += new System.EventHandler(this.tb_DoubleClick);
             this.tb_telefonnummer.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.tb_telefonnummer_KeyPress);
             // 
             // btn_leeren
@@ -484,6 +486,7 @@
             // 
             this.dgv_Personnen.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.dgv_Personnen.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgv_Personnen.ContextMenuStrip = this.contextMenuStrip1;
             this.dgv_Personnen.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgv_Personnen.Location = new System.Drawing.Point(0, 0);
             this.dgv_Personnen.Name = "dgv_Personnen";
@@ -491,6 +494,31 @@
             this.dgv_Personnen.Size = new System.Drawing.Size(971, 526);
             this.dgv_Personnen.TabIndex = 31;
             this.dgv_Personnen.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_Personnen_CellDoubleClick);
+            // 
+            // contextMenuStrip1
+            // 
+            this.contextMenuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.exportierenToolStripMenuItem,
+            this.aktualisierenToolStripMenuItem});
+            this.contextMenuStrip1.Name = "contextMenuStrip1";
+            this.contextMenuStrip1.Size = new System.Drawing.Size(181, 70);
+            // 
+            // exportierenToolStripMenuItem
+            // 
+            this.exportierenToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.nurAusgewaehlteToolStripMenuItem,
+            this.cSVToolStripMenuItem,
+            this.xLSXToolStripMenuItem});
+            this.exportierenToolStripMenuItem.Name = "exportierenToolStripMenuItem";
+            this.exportierenToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.exportierenToolStripMenuItem.Text = "Exportieren";
+            // 
+            // aktualisierenToolStripMenuItem
+            // 
+            this.aktualisierenToolStripMenuItem.Name = "aktualisierenToolStripMenuItem";
+            this.aktualisierenToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.aktualisierenToolStripMenuItem.Text = "Aktualisieren";
+            this.aktualisierenToolStripMenuItem.Click += new System.EventHandler(this.aktualisierenToolStripMenuItem_Click);
             // 
             // panel2
             // 
@@ -500,6 +528,42 @@
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(971, 526);
             this.panel2.TabIndex = 30;
+            // 
+            // nurAusgewaehlteToolStripMenuItem
+            // 
+            this.nurAusgewaehlteToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.eCSVToolStripMenuItem,
+            this.eXLSXToolStripMenuItem});
+            this.nurAusgewaehlteToolStripMenuItem.Name = "nurAusgewaehlteToolStripMenuItem";
+            this.nurAusgewaehlteToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.nurAusgewaehlteToolStripMenuItem.Text = "Nur ausgewaehlte";
+            // 
+            // eCSVToolStripMenuItem
+            // 
+            this.eCSVToolStripMenuItem.Name = "eCSVToolStripMenuItem";
+            this.eCSVToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.eCSVToolStripMenuItem.Text = "eCSV";
+            // 
+            // eXLSXToolStripMenuItem
+            // 
+            this.eXLSXToolStripMenuItem.Name = "eXLSXToolStripMenuItem";
+            this.eXLSXToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.eXLSXToolStripMenuItem.Text = "eXLSX";
+            this.eXLSXToolStripMenuItem.Click += new System.EventHandler(this.eXLSXToolStripMenuItem_Click);
+            // 
+            // cSVToolStripMenuItem
+            // 
+            this.cSVToolStripMenuItem.Name = "cSVToolStripMenuItem";
+            this.cSVToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.cSVToolStripMenuItem.Text = "CSV";
+            this.cSVToolStripMenuItem.Click += new System.EventHandler(this.cSVToolStripMenuItem_Click);
+            // 
+            // xLSXToolStripMenuItem
+            // 
+            this.xLSXToolStripMenuItem.Name = "xLSXToolStripMenuItem";
+            this.xLSXToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.xLSXToolStripMenuItem.Text = "XLSX";
+            this.xLSXToolStripMenuItem.Click += new System.EventHandler(this.xLSXToolStripMenuItem_Click);
             // 
             // Form1
             // 
@@ -513,6 +577,7 @@
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgv_Personnen)).EndInit();
+            this.contextMenuStrip1.ResumeLayout(false);
             this.panel2.ResumeLayout(false);
             this.ResumeLayout(false);
 
@@ -557,6 +622,14 @@
         private System.Windows.Forms.Button btn_neu;
         private System.Windows.Forms.Button btn_suchen;
         private System.Windows.Forms.MaskedTextBox mtb_geburtstagdatum;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
+        private System.Windows.Forms.ToolStripMenuItem aktualisierenToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem exportierenToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem nurAusgewaehlteToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem eCSVToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem eXLSXToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem cSVToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem xLSXToolStripMenuItem;
     }
 }
 
