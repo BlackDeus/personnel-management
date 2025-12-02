@@ -45,7 +45,6 @@
             this.tb_name = new System.Windows.Forms.TextBox();
             this.tb_vorname = new System.Windows.Forms.TextBox();
             this.cb_geschlecht = new System.Windows.Forms.ComboBox();
-            this.dtp_geburtdatum = new System.Windows.Forms.DateTimePicker();
             this.lbl_alterberechnen = new System.Windows.Forms.Label();
             this.tb_strasse = new System.Windows.Forms.TextBox();
             this.tb_hausnr = new System.Windows.Forms.TextBox();
@@ -57,14 +56,15 @@
             this.btn_leeren = new System.Windows.Forms.Button();
             this.btn_speichern = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.btn_neu = new System.Windows.Forms.Button();
-            this.btn_loeschen = new System.Windows.Forms.Button();
+            this.mtb_geburtstagdatum = new System.Windows.Forms.MaskedTextBox();
             this.label1 = new System.Windows.Forms.Label();
+            this.btn_loeschen = new System.Windows.Forms.Button();
             this.tb_suchen = new System.Windows.Forms.TextBox();
+            this.btn_suchen = new System.Windows.Forms.Button();
+            this.btn_neu = new System.Windows.Forms.Button();
             this.lbl_verbindungstatus = new System.Windows.Forms.Label();
             this.dgv_Personnen = new System.Windows.Forms.DataGridView();
             this.panel2 = new System.Windows.Forms.Panel();
-            this.btn_suchen = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgv_Personnen)).BeginInit();
             this.panel2.SuspendLayout();
@@ -224,7 +224,7 @@
             this.tb_name.Name = "tb_name";
             this.tb_name.Size = new System.Drawing.Size(100, 20);
             this.tb_name.TabIndex = 14;
-            this.tb_name.DoubleClick += new System.EventHandler(this.tb_DoubleClick);
+            //this.tb_name.DoubleClick += new System.EventHandler(this.tb_DoubleClick);
             this.tb_name.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.tb_name_KeyPress);
             // 
             // tb_vorname
@@ -233,7 +233,7 @@
             this.tb_vorname.Name = "tb_vorname";
             this.tb_vorname.Size = new System.Drawing.Size(100, 20);
             this.tb_vorname.TabIndex = 15;
-            this.tb_vorname.DoubleClick += new System.EventHandler(this.tb_DoubleClick);
+            //this.tb_vorname.DoubleClick += new System.EventHandler(this.tb_DoubleClick);
             this.tb_vorname.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.tb_name_KeyPress);
             // 
             // cb_geschlecht
@@ -254,16 +254,6 @@
             this.cb_geschlecht.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.tb_name_KeyPress);
             this.cb_geschlecht.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.cb_MouseDoubleClick);
             // 
-            // dtp_geburtdatum
-            // 
-            this.dtp_geburtdatum.Location = new System.Drawing.Point(79, 117);
-            this.dtp_geburtdatum.Name = "dtp_geburtdatum";
-            this.dtp_geburtdatum.Size = new System.Drawing.Size(100, 20);
-            this.dtp_geburtdatum.TabIndex = 17;
-            this.dtp_geburtdatum.ValueChanged += new System.EventHandler(this.dtp_geburtdatum_ValueChanged);
-            this.dtp_geburtdatum.Enter += new System.EventHandler(this.dtp_geburtdatum_Enter);
-            this.dtp_geburtdatum.MouseDown += new System.Windows.Forms.MouseEventHandler(this.dtp_geburtdatum_MouseDown);
-            // 
             // lbl_alterberechnen
             // 
             this.lbl_alterberechnen.AutoSize = true;
@@ -278,8 +268,8 @@
             this.tb_strasse.Location = new System.Drawing.Point(79, 168);
             this.tb_strasse.Name = "tb_strasse";
             this.tb_strasse.Size = new System.Drawing.Size(100, 20);
-            this.tb_strasse.TabIndex = 19;
-            this.tb_strasse.DoubleClick += new System.EventHandler(this.tb_DoubleClick);
+            this.tb_strasse.TabIndex = 18;
+            //this.tb_strasse.DoubleClick += new System.EventHandler(this.tb_DoubleClick);
             this.tb_strasse.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.tb_name_KeyPress);
             // 
             // tb_hausnr
@@ -287,8 +277,8 @@
             this.tb_hausnr.Location = new System.Drawing.Point(79, 191);
             this.tb_hausnr.Name = "tb_hausnr";
             this.tb_hausnr.Size = new System.Drawing.Size(100, 20);
-            this.tb_hausnr.TabIndex = 20;
-            this.tb_hausnr.DoubleClick += new System.EventHandler(this.tb_DoubleClick);
+            this.tb_hausnr.TabIndex = 19;
+           // this.tb_hausnr.DoubleClick += new System.EventHandler(this.tb_DoubleClick);
             // 
             // tb_plz
             // 
@@ -296,8 +286,8 @@
             this.tb_plz.MaxLength = 5;
             this.tb_plz.Name = "tb_plz";
             this.tb_plz.Size = new System.Drawing.Size(100, 20);
-            this.tb_plz.TabIndex = 21;
-            this.tb_plz.DoubleClick += new System.EventHandler(this.tb_DoubleClick);
+            this.tb_plz.TabIndex = 20;
+           // this.tb_plz.DoubleClick += new System.EventHandler(this.tb_DoubleClick);
             this.tb_plz.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.tb_plz_KeyPress);
             // 
             // tb_ort
@@ -305,8 +295,8 @@
             this.tb_ort.Location = new System.Drawing.Point(79, 237);
             this.tb_ort.Name = "tb_ort";
             this.tb_ort.Size = new System.Drawing.Size(100, 20);
-            this.tb_ort.TabIndex = 22;
-            this.tb_ort.DoubleClick += new System.EventHandler(this.tb_DoubleClick);
+            this.tb_ort.TabIndex = 21;
+            //this.tb_ort.DoubleClick += new System.EventHandler(this.tb_DoubleClick);
             this.tb_ort.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.tb_name_KeyPress);
             // 
             // cb_bundesland
@@ -333,7 +323,7 @@
             this.cb_bundesland.Location = new System.Drawing.Point(79, 259);
             this.cb_bundesland.Name = "cb_bundesland";
             this.cb_bundesland.Size = new System.Drawing.Size(100, 21);
-            this.cb_bundesland.TabIndex = 23;
+            this.cb_bundesland.TabIndex = 22;
             this.cb_bundesland.SelectedIndexChanged += new System.EventHandler(this.ComboBox_Changed);
             this.cb_bundesland.TextUpdate += new System.EventHandler(this.ComboBox_Changed);
             this.cb_bundesland.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.cb_MouseDoubleClick);
@@ -343,8 +333,8 @@
             this.tb_email.Location = new System.Drawing.Point(79, 283);
             this.tb_email.Name = "tb_email";
             this.tb_email.Size = new System.Drawing.Size(100, 20);
-            this.tb_email.TabIndex = 24;
-            this.tb_email.DoubleClick += new System.EventHandler(this.tb_DoubleClick);
+            this.tb_email.TabIndex = 23;
+            //this.tb_email.DoubleClick += new System.EventHandler(this.tb_DoubleClick);
             // 
             // tb_telefonnummer
             // 
@@ -352,9 +342,9 @@
             this.tb_telefonnummer.MaxLength = 20;
             this.tb_telefonnummer.Name = "tb_telefonnummer";
             this.tb_telefonnummer.Size = new System.Drawing.Size(100, 20);
-            this.tb_telefonnummer.TabIndex = 25;
+            this.tb_telefonnummer.TabIndex = 24;
             this.tb_telefonnummer.TextChanged += new System.EventHandler(this.tb_telefonnummer_TextChanged);
-            this.tb_telefonnummer.DoubleClick += new System.EventHandler(this.tb_DoubleClick);
+            //this.tb_telefonnummer.DoubleClick += new System.EventHandler(this.tb_DoubleClick);
             this.tb_telefonnummer.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.tb_telefonnummer_KeyPress);
             // 
             // btn_leeren
@@ -362,7 +352,7 @@
             this.btn_leeren.Location = new System.Drawing.Point(17, 362);
             this.btn_leeren.Name = "btn_leeren";
             this.btn_leeren.Size = new System.Drawing.Size(75, 23);
-            this.btn_leeren.TabIndex = 27;
+            this.btn_leeren.TabIndex = 26;
             this.btn_leeren.Text = "Leeren";
             this.btn_leeren.UseVisualStyleBackColor = true;
             this.btn_leeren.Click += new System.EventHandler(this.btn_leeren_Click);
@@ -372,13 +362,15 @@
             this.btn_speichern.Location = new System.Drawing.Point(16, 391);
             this.btn_speichern.Name = "btn_speichern";
             this.btn_speichern.Size = new System.Drawing.Size(161, 23);
-            this.btn_speichern.TabIndex = 29;
+            this.btn_speichern.TabIndex = 28;
             this.btn_speichern.Text = "Speichern";
             this.btn_speichern.UseVisualStyleBackColor = true;
             this.btn_speichern.Click += new System.EventHandler(this.btn_speichern_Click);
             // 
             // panel1
             // 
+            this.panel1.BackColor = System.Drawing.SystemColors.ScrollBar;
+            this.panel1.Controls.Add(this.mtb_geburtstagdatum);
             this.panel1.Controls.Add(this.label1);
             this.panel1.Controls.Add(this.btn_loeschen);
             this.panel1.Controls.Add(this.tb_suchen);
@@ -405,7 +397,6 @@
             this.panel1.Controls.Add(this.lbl_ort);
             this.panel1.Controls.Add(this.lbl_alterberechnen);
             this.panel1.Controls.Add(this.lbl_bundesland);
-            this.panel1.Controls.Add(this.dtp_geburtdatum);
             this.panel1.Controls.Add(this.lbl_email);
             this.panel1.Controls.Add(this.cb_geschlecht);
             this.panel1.Controls.Add(this.lbl_telefonnummer);
@@ -419,25 +410,16 @@
             this.panel1.Size = new System.Drawing.Size(200, 526);
             this.panel1.TabIndex = 28;
             // 
-            // btn_neu
+            // mtb_geburtstagdatum
             // 
-            this.btn_neu.Location = new System.Drawing.Point(103, 362);
-            this.btn_neu.Name = "btn_neu";
-            this.btn_neu.Size = new System.Drawing.Size(75, 23);
-            this.btn_neu.TabIndex = 28;
-            this.btn_neu.Text = "Neu";
-            this.btn_neu.UseVisualStyleBackColor = true;
-            this.btn_neu.Click += new System.EventHandler(this.btn_neu_Click);
-            // 
-            // btn_loeschen
-            // 
-            this.btn_loeschen.Location = new System.Drawing.Point(102, 421);
-            this.btn_loeschen.Name = "btn_loeschen";
-            this.btn_loeschen.Size = new System.Drawing.Size(75, 23);
-            this.btn_loeschen.TabIndex = 31;
-            this.btn_loeschen.Text = "Löschen";
-            this.btn_loeschen.UseVisualStyleBackColor = true;
-            this.btn_loeschen.Click += new System.EventHandler(this.btn_loeschen_Click);
+            this.mtb_geburtstagdatum.Location = new System.Drawing.Point(79, 118);
+            this.mtb_geburtstagdatum.Name = "mtb_geburtstagdatum";
+            this.mtb_geburtstagdatum.Size = new System.Drawing.Size(100, 20);
+            this.mtb_geburtstagdatum.TabIndex = 17;
+            this.mtb_geburtstagdatum.TextMaskFormat = System.Windows.Forms.MaskFormat.IncludePromptAndLiterals;
+            this.mtb_geburtstagdatum.TextChanged += new System.EventHandler(this.mtb_geburtstagdatum_TextChanged);
+            this.mtb_geburtstagdatum.Enter += new System.EventHandler(this.mtb_geburtstagdatum_Enter);
+            this.mtb_geburtstagdatum.KeyDown += new System.Windows.Forms.KeyEventHandler(this.mtb_geburtstagdatum_KeyDown);
             // 
             // label1
             // 
@@ -448,6 +430,16 @@
             this.label1.TabIndex = 1;
             this.label1.Text = "ID:";
             // 
+            // btn_loeschen
+            // 
+            this.btn_loeschen.Location = new System.Drawing.Point(102, 421);
+            this.btn_loeschen.Name = "btn_loeschen";
+            this.btn_loeschen.Size = new System.Drawing.Size(75, 23);
+            this.btn_loeschen.TabIndex = 30;
+            this.btn_loeschen.Text = "Löschen";
+            this.btn_loeschen.UseVisualStyleBackColor = true;
+            this.btn_loeschen.Click += new System.EventHandler(this.btn_loeschen_Click);
+            // 
             // tb_suchen
             // 
             this.tb_suchen.Enabled = false;
@@ -455,8 +447,28 @@
             this.tb_suchen.Name = "tb_suchen";
             this.tb_suchen.ReadOnly = true;
             this.tb_suchen.Size = new System.Drawing.Size(51, 20);
-            this.tb_suchen.TabIndex = 30;
+            this.tb_suchen.TabIndex = 29;
             this.tb_suchen.Text = "0";
+            // 
+            // btn_suchen
+            // 
+            this.btn_suchen.Location = new System.Drawing.Point(17, 333);
+            this.btn_suchen.Name = "btn_suchen";
+            this.btn_suchen.Size = new System.Drawing.Size(161, 23);
+            this.btn_suchen.TabIndex = 25;
+            this.btn_suchen.Text = "Suchen";
+            this.btn_suchen.UseVisualStyleBackColor = true;
+            this.btn_suchen.Click += new System.EventHandler(this.btn_suchen_Click);
+            // 
+            // btn_neu
+            // 
+            this.btn_neu.Location = new System.Drawing.Point(103, 362);
+            this.btn_neu.Name = "btn_neu";
+            this.btn_neu.Size = new System.Drawing.Size(75, 23);
+            this.btn_neu.TabIndex = 27;
+            this.btn_neu.Text = "Neu";
+            this.btn_neu.UseVisualStyleBackColor = true;
+            this.btn_neu.Click += new System.EventHandler(this.btn_neu_Click);
             // 
             // lbl_verbindungstatus
             // 
@@ -478,7 +490,6 @@
             this.dgv_Personnen.ReadOnly = true;
             this.dgv_Personnen.Size = new System.Drawing.Size(971, 526);
             this.dgv_Personnen.TabIndex = 31;
-            this.dgv_Personnen.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_Personnen_CellClick);
             this.dgv_Personnen.CellDoubleClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.dgv_Personnen_CellDoubleClick);
             // 
             // panel2
@@ -489,16 +500,6 @@
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(971, 526);
             this.panel2.TabIndex = 30;
-            // 
-            // btn_suchen
-            // 
-            this.btn_suchen.Location = new System.Drawing.Point(17, 333);
-            this.btn_suchen.Name = "btn_suchen";
-            this.btn_suchen.Size = new System.Drawing.Size(161, 23);
-            this.btn_suchen.TabIndex = 26;
-            this.btn_suchen.Text = "Suchen";
-            this.btn_suchen.UseVisualStyleBackColor = true;
-            this.btn_suchen.Click += new System.EventHandler(this.btn_suchen_Click);
             // 
             // Form1
             // 
@@ -536,7 +537,6 @@
         private System.Windows.Forms.TextBox tb_name;
         private System.Windows.Forms.TextBox tb_vorname;
         private System.Windows.Forms.ComboBox cb_geschlecht;
-        private System.Windows.Forms.DateTimePicker dtp_geburtdatum;
         private System.Windows.Forms.Label lbl_alterberechnen;
         private System.Windows.Forms.TextBox tb_strasse;
         private System.Windows.Forms.TextBox tb_hausnr;
@@ -556,6 +556,7 @@
         private System.Windows.Forms.TextBox tb_suchen;
         private System.Windows.Forms.Button btn_neu;
         private System.Windows.Forms.Button btn_suchen;
+        private System.Windows.Forms.MaskedTextBox mtb_geburtstagdatum;
     }
 }
 

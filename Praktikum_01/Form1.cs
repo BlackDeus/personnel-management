@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
 using System.Net.Mail;
 using System.Security.Cryptography.X509Certificates;
@@ -12,7 +14,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Configuration;
+using static System.Net.Mime.MediaTypeNames;
 
 
 
@@ -38,17 +40,21 @@ namespace Praktikum_01
             cb_bundesland.AutoCompleteSource = AutoCompleteSource.ListItems;
             cb_bundesland.TextChanged += ComboBox_ValidateTypedText;
             // Format wechseln
-            dtp_geburtdatum.Format = DateTimePickerFormat.Custom;
-            dtp_geburtdatum.CustomFormat = "dd.MM.yyyy";
+            // inside Form_Load or constructor
+            mtb_geburtstagdatum.Mask = "00/00/0000";
+            mtb_geburtstagdatum.Culture = new CultureInfo("de-DE");
+            mtb_geburtstagdatum.TextMaskFormat = MaskFormat.IncludePromptAndLiterals;
+            mtb_geburtstagdatum.PromptChar = '_';
+            mtb_geburtstagdatum.SkipLiterals = true;  
+            mtb_geburtstagdatum.ResetOnPrompt = true;
+            mtb_geburtstagdatum.ResetOnSpace = true;
+            mtb_geburtstagdatum.AsciiOnly = true;     
 
             LadePersonen();
             LoadData();
 
             AttachValidationEvents(this);
 
-            
-            dtp_geburtdatum.MaxDate = DateTime.Today.AddYears(-0);  //Mindestens zulässiges Alter = 1
-            dtp_geburtdatum.MinDate = DateTime.Today.AddYears(-100); // Höchstzulässiges Alter = 99;
         }
 
         private void LadePersonen()
@@ -101,7 +107,7 @@ namespace Praktikum_01
 
         private void HighlightFelder(Control c)
         {
-            if (isClearing) 
+            if (isClearing)
                 return;
 
             if (c is TextBox tb)
@@ -124,6 +130,10 @@ namespace Praktikum_01
                                    : Color.White;
                 }
             }
+            if (mtb_geburtstagdatum.Text.Contains("_"))
+                mtb_geburtstagdatum.BackColor = Color.Yellow;
+            else
+                mtb_geburtstagdatum.BackColor = Color.White;
         }
 
         private void AttachValidationEvents(Control parent)
@@ -201,6 +211,7 @@ namespace Praktikum_01
                         else if (!Regex.IsMatch(tb.Text.Trim(), @"^[^@\s]+@[^@\s]+\.[A-Za-z]{2,}$"))
                         {
                             tb.BackColor = Color.Red;     // invalid format
+                            tb.ForeColor = Color.White;
                             allFilled = false;
                         }
                         else
@@ -246,50 +257,37 @@ namespace Praktikum_01
 
 
 
-        private void dtp_geburtdatum_ValueChanged(object sender, EventArgs e)
-        {
-            if (dtp_geburtdatum.CustomFormat == " ")
-            {
-                dtp_geburtdatum.CustomFormat = "dd.MM.yyyy";
-            }
-            dtp_geburtdatum.Format = DateTimePickerFormat.Custom;
-            dtp_geburtdatum.CustomFormat = "dd.MM.yyyy";
 
-            DateTime geb = dtp_geburtdatum.Value.Date;
-            DateTime heute = DateTime.Today;
-
-            int Alter = heute.Year - geb.Year;
-            if (geb > heute.AddYears(-Alter)) Alter--;
-
-            int Monat = (heute.Year - geb.Year) * 12 + heute.Month - geb.Month;
-            if (heute.Day < geb.Day) Monat--;
-
-            if (geb == heute)
-            {
-                lbl_alterberechnen.Text = "";
-                return;
-            }
-           
-            if (Alter < 18 || Alter > 100)
-            {
-                lbl_alterberechnen.ForeColor = Color.Red;
-            }
-            else
-            {
-                lbl_alterberechnen.ForeColor = Color.Green;
-            }
-
-            lbl_alterberechnen.Text = $"{Alter} Jahre {Monat % 12} Monate";
-
-        }
 
         // Auch alter Validation, aber fur speichern
-        public bool IsValidAge(DateTime geburtsdatum)
+        public bool IsValidAge()
         {
-            int Alter = DateTime.Today.Year - dtp_geburtdatum.Value.Year;
+            string text = mtb_geburtstagdatum.Text;
 
-            return Alter >= 18 && Alter <= 100;
+            // Wenn Platzhalter enthalten sind → Datum ist noch unvollständig → ungültig
+            if (text.Contains("_"))
+                return false;
+
+            // Versuch: gültiges Datum nach dd.MM.yyyy parsen
+            if (!DateTime.TryParseExact(
+                text,
+                "dd.MM.yyyy",
+                CultureInfo.InvariantCulture,
+                DateTimeStyles.None,
+                out DateTime geburtsdatum))
+            {
+                return false; // ungültiges Datum
+            }
+
+            // Altersberechnung
+            int alter = DateTime.Today.Year - geburtsdatum.Year;
+            if (geburtsdatum.Date > DateTime.Today.AddYears(-alter)) alter--;
+            lbl_alterberechnen.Text = Convert.ToString(alter);
+
+            // Beispiel: Mindestalter 14
+            return alter >= 14;
         }
+
 
         // Email validation
         private bool IsValidEmail(string email)
@@ -445,19 +443,33 @@ namespace Praktikum_01
                 dgv_Personnen.DataSource = dt;
             }
         }
-
-        private void ClearTextBoxes(Control parent)
+        private void NewTextBoxes(Control parent)
         {
             foreach (Control ctl in parent.Controls)
             {
                 if (ctl is TextBox tb)
-                    tb.Text = null;   // oder ""
+                        tb.Clear();        // or tb.Text = ""
                 else
                     ClearTextBoxes(ctl);  // sucht drinn child containers
                 tb_suchen.Text = "0";
             }
         }
-        private void btn_leeren_Click(object sender, EventArgs e) // hier loeschen wir alle Daten 
+        private void ClearTextBoxes(Control parent)
+        {
+            foreach (Control ctl in parent.Controls)
+            {
+                if (ctl is TextBox tb)
+                {
+                    if (tb != tb_suchen)   // ← ausfall
+                    {
+                        tb.Clear();       
+                    }
+                }
+                if (ctl.HasChildren)
+                    ClearTextBoxes(ctl);  // sucht drinn child containers
+            }
+        }
+        private void btn_leeren_Click(object sender, EventArgs e) // hier leeren wir alle Daten 
         {
             isClearing = true;
             ClearTextBoxes(this);
@@ -467,33 +479,39 @@ namespace Praktikum_01
             cb_anrede.Text = null;     // ComboBox
             cb_geschlecht.Text = null;
 
-            dtp_geburtdatum.CustomFormat = " ";  // Date und Zeit
-            dtp_geburtdatum.Value = DateTime.Today;
+            mtb_geburtstagdatum.Clear();
 
             lbl_alterberechnen.Text = null;
 
             ResetBackcolors(this);
             isClearing = false;
+
+            btn_speichern.Text = "Speichern";
+            EnableInputs();
+            cb_anrede.Focus();
             LoadData();
 
         }
         private void btn_neu_Click(object sender, EventArgs e)
         {
             isClearing = true;
-            ClearTextBoxes(this);
+            NewTextBoxes(this);
 
             cb_bundesland.SelectedIndex = -1; // dropdown list loeschen
 
             cb_anrede.Text = null;     // ComboBox
             cb_geschlecht.Text = null;
 
-            dtp_geburtdatum.CustomFormat = " ";  // Date und Zeit
-            dtp_geburtdatum.Format = DateTimePickerFormat.Custom;
+            mtb_geburtstagdatum.Clear();
 
             lbl_alterberechnen.Text = null;
 
             ResetBackcolors(this);
             isClearing = false;
+
+            btn_speichern.Text = "Speichern";
+            EnableInputs();
+            cb_anrede.Focus();
             LoadData();
         }
 
@@ -506,8 +524,156 @@ namespace Praktikum_01
 
                 if (c.HasChildren)
                     ResetBackcolors(c);
+                mtb_geburtstagdatum.BackColor = Color.White;
             }
         }
+
+        private void EnableInputs()
+        {
+            foreach (Control c in panel1.Controls)
+            {
+                if (c == tb_suchen)
+                    continue;
+                c.Enabled = true;
+            }
+        }
+
+        private void DisableInputs()
+        {
+            foreach (Control c in panel1.Controls)
+            {
+                if (c == btn_neu || c == btn_speichern)
+                    continue;
+                c.Enabled = false;
+            }
+        }
+        private void InsertPerson()
+        {
+            try
+            {
+                string connStr = ConfigurationManager.ConnectionStrings["db"].ConnectionString;
+
+                using (SqlConnection con = new SqlConnection(connStr))
+                {
+                    con.Open();
+
+                    string sql = @"
+                INSERT INTO Person
+                (Anrede, Vorname, Nachname, Geschlecht, Email, Geburtsdatum, PLZ, Ort, Bundesland, Straße, HausNr, Telefonnummer)
+                VALUES
+                (@Anrede, @Vorname, @Nachname, @Geschlecht, @Email, @Geburtsdatum, @PLZ, @Ort, @Bundesland, @Straße, @HausNr, @Telefonnummer)";
+
+                    using (SqlCommand cmd = new SqlCommand(sql, con))
+                    {
+                        cmd.Parameters.AddWithValue("@Anrede", cb_anrede.Text.Trim());
+                        cmd.Parameters.AddWithValue("@Vorname", tb_vorname.Text.Trim());
+                        cmd.Parameters.AddWithValue("@Nachname", tb_name.Text.Trim());
+                        cmd.Parameters.AddWithValue("@Geschlecht", cb_geschlecht.Text.Trim());
+                        cmd.Parameters.AddWithValue("@Email", tb_email.Text.Trim());
+                        
+                        string rawDate = CleanDateText(mtb_geburtstagdatum.Text);
+                        if (!DateTime.TryParseExact(
+                                rawDate,
+                                "dd.MM.yyyy",
+                                CultureInfo.InvariantCulture,
+                                DateTimeStyles.None,
+                                out DateTime geburtsdatum))
+                        {
+                            MessageBox.Show("Ungültiges Datum!");
+                            return;
+                        }
+
+                        cmd.Parameters.AddWithValue("@Geburtsdatum", geburtsdatum);
+                        cmd.Parameters.AddWithValue("@PLZ", tb_plz.Text.Trim());
+                        cmd.Parameters.AddWithValue("@Ort", tb_ort.Text.Trim());
+                        cmd.Parameters.AddWithValue("@Bundesland", cb_bundesland.Text.Trim());
+                        cmd.Parameters.AddWithValue("@Straße", tb_strasse.Text.Trim());
+                        cmd.Parameters.AddWithValue("@HausNr", tb_hausnr.Text.Trim());
+                        cmd.Parameters.AddWithValue("@Telefonnummer", tb_telefonnummer.Text.Trim());
+
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+
+                MessageBox.Show("Erfolgreich gespeichert!");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Fehler beim Speichern:\n" + ex.Message);
+            }
+        }
+
+        private void UpdatePerson(int id)
+        {
+            try
+            {
+                string connStr = ConfigurationManager.ConnectionStrings["db"].ConnectionString;
+
+                using (SqlConnection con = new SqlConnection(connStr))
+                {
+                    con.Open();
+
+                    string sql = @"
+                UPDATE Person SET
+                    Anrede = @Anrede,
+                    Vorname = @Vorname,
+                    Nachname = @Nachname,
+                    Geschlecht = @Geschlecht,
+                    Email = @Email,
+                    Geburtsdatum = @Geburtsdatum,
+                    PLZ = @PLZ,
+                    Ort = @Ort,
+                    Bundesland = @Bundesland,
+                    Straße = @Straße,
+                    HausNr = @HausNr,
+                    Telefonnummer = @Telefonnummer
+                WHERE ID = @ID";
+
+                    using (SqlCommand cmd = new SqlCommand(sql, con))
+                    {
+                        cmd.Parameters.AddWithValue("@Anrede", cb_anrede.Text.Trim());
+                        cmd.Parameters.AddWithValue("@Vorname", tb_vorname.Text.Trim());
+                        cmd.Parameters.AddWithValue("@Nachname", tb_name.Text.Trim());
+                        cmd.Parameters.AddWithValue("@Geschlecht", cb_geschlecht.Text.Trim());
+                        cmd.Parameters.AddWithValue("@Email", tb_email.Text.Trim());
+
+                        string rawDate = CleanDateText(mtb_geburtstagdatum.Text);
+
+                        if (!DateTime.TryParseExact(
+                                rawDate,
+                                "dd.MM.yyyy",
+                                CultureInfo.InvariantCulture,
+                                DateTimeStyles.None,
+                                out DateTime geburtsdatum))
+                        {
+                            MessageBox.Show("Ungültiges Datum!");
+                            return;
+                        }
+
+                        cmd.Parameters.AddWithValue("@Geburtsdatum", geburtsdatum);
+
+                        cmd.Parameters.AddWithValue("@PLZ", tb_plz.Text.Trim());
+                        cmd.Parameters.AddWithValue("@Ort", tb_ort.Text.Trim());
+                        cmd.Parameters.AddWithValue("@Bundesland", cb_bundesland.Text.Trim());
+                        cmd.Parameters.AddWithValue("@Straße", tb_strasse.Text.Trim());
+                        cmd.Parameters.AddWithValue("@HausNr", tb_hausnr.Text.Trim());
+                        cmd.Parameters.AddWithValue("@Telefonnummer", tb_telefonnummer.Text.Trim());
+
+                        cmd.Parameters.AddWithValue("@ID", id);
+
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+
+                MessageBox.Show("Erfolgreich aktualisiert!");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Fehler beim Aktualisieren:\n" + ex.Message);
+            }
+        }
+
+
 
 
         private void btn_speichern_Click(object sender, EventArgs e)
@@ -529,6 +695,12 @@ namespace Praktikum_01
                 lbl_verbindungstatus.ForeColor = Color.Red;
             }
 
+            if (btn_speichern.Text == "Aktualisieren")
+            {
+                EnableInputs();
+                btn_speichern.Text = "Speichern";
+                return;
+            }
 
             // Fehler Meldungen, bei Eingabe
             string email = tb_email.Text.Trim();
@@ -536,121 +708,34 @@ namespace Praktikum_01
             {
                 (AllFieldsFilled(this), "Füllen Sie alle Spalten!"),
                 (IsValidEmail(email), "Bitte geben Sie eine gültige E-Mail-Adresse ein!"),
-                (IsValidAge(dtp_geburtdatum.Value), "Der Kunde ist nicht im erlaubten Altersbereich (18–100 Jahre)."),
+                (IsValidAge(), "Der Kunde ist nicht im erlaubten Altersbereich (18–100 Jahre)."),
                 (IsValidPLZ(tb_plz.Text), "Bitte eine gültige PLZ eingeben (nur 5 Ziffern)!"),
                 (IsValidTelNr(tb_telefonnummer.Text), "Bitte eine gültige Telefonnummer eingeben!")
             };
-
-            foreach (var check in checks)
+            foreach (var (isValid, message) in checks)
             {
-                if (!check.isValid)
+                if (!isValid)
                 {
-                    MessageBox.Show(check.message, "Fehler", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                    return;
+                    MessageBox.Show(message, "Fehler", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;  
                 }
             }
 
-            // pruft ob die Daten aktualisieren oder neu agelegt werden mussen
             int id = Convert.ToInt32(tb_suchen.Text);
-            if (id == 0) // wenn id == 0, ==> NEW. wenn id >= 1, ==> UPDATE.
+
+            if (btn_speichern.Text == "Speichern")
             {
-                // Data Eingabe
-                try
+                if (id == 0)
                 {
-                    string connStr = ConfigurationManager.ConnectionStrings["db"].ConnectionString;
-
-                    using (SqlConnection con = new SqlConnection(connStr))
-                    {
-                        con.Open();
-
-                        string sql = @"
-                            INSERT INTO Person
-                            (Anrede, Vorname, Nachname, Geschlecht, Email, Geburtsdatum, PLZ, Ort, Bundesland, Straße, HausNr, Telefonnummer)
-                            VALUES
-                            (@Anrede, @Vorname, @Nachname, @Geschlecht, @Email, @Geburtsdatum, @PLZ, @Ort, @Bundesland, @Straße, @HausNr, @Telefonnummer)";
-
-                        using (SqlCommand cmd = new SqlCommand(sql, con))
-                        {
-                            cmd.Parameters.AddWithValue("@Anrede", cb_anrede.Text.Trim());
-                            cmd.Parameters.AddWithValue("@Vorname", tb_vorname.Text.Trim());
-                            cmd.Parameters.AddWithValue("@Nachname", tb_name.Text.Trim());
-                            cmd.Parameters.AddWithValue("@Geschlecht", cb_geschlecht.Text.Trim());
-                            cmd.Parameters.AddWithValue("@Email", tb_email.Text.Trim());
-                            cmd.Parameters.AddWithValue("@Geburtsdatum", dtp_geburtdatum.Value);
-                            cmd.Parameters.AddWithValue("@PLZ", tb_plz.Text.Trim());
-                            cmd.Parameters.AddWithValue("@Ort", tb_ort.Text.Trim());
-                            cmd.Parameters.AddWithValue("@Bundesland", cb_bundesland.Text.Trim());
-                            cmd.Parameters.AddWithValue("@Straße", tb_strasse.Text.Trim());
-                            cmd.Parameters.AddWithValue("@HausNr", tb_hausnr.Text.Trim());
-                            cmd.Parameters.AddWithValue("@Telefonnummer", tb_telefonnummer.Text.Trim());
-
-                            cmd.ExecuteNonQuery();
-                        }
-                    }
-                    MessageBox.Show("Erfolgreich gespeichert!");
+                    InsertPerson();
+                    //btn_neu.PerformClick();
                 }
-                catch (Exception ex)
+                else
                 {
-                    MessageBox.Show("Fehler beim Speichern:\n" + ex.Message);
+                    UpdatePerson(id);
+                    //btn_neu.PerformClick();
                 }
-                LoadData();
-            }
-            else if(MessageBox.Show($"{tb_name.Text}, {tb_vorname.Text} exsistiert bereits.{Environment.NewLine}Möchten Sie diesen Eintrag aktualisieren oder einen Neuen erstellen?",
-                                "Aktualisieren",
-                                MessageBoxButtons.YesNoCancel) == DialogResult.Yes)
-            {
-                try
-                {
-                    string connStr = ConfigurationManager.ConnectionStrings["db"].ConnectionString;
-
-                    using (SqlConnection con = new SqlConnection(connStr))
-                    {
-                        con.Open();
-
-                        string sql = @"
-                                UPDATE Person SET
-                                    Anrede = @Anrede,
-                                    Vorname = @Vorname,
-                                    Nachname = @Nachname,
-                                    Geschlecht = @Geschlecht,
-                                    Email = @Email,
-                                    Geburtsdatum = @Geburtsdatum,
-                                    PLZ = @PLZ,
-                                    Ort = @Ort,
-                                    Bundesland = @Bundesland,
-                                    Straße = @Straße,
-                                    HausNr = @HausNr,
-                                    Telefonnummer = @Telefonnummer
-                                WHERE ID = @ID";  // <--- 
-
-                        using (SqlCommand cmd = new SqlCommand(sql, con))
-                        {
-                            cmd.Parameters.AddWithValue("@Anrede", cb_anrede.Text.Trim());
-                            cmd.Parameters.AddWithValue("@Vorname", tb_vorname.Text.Trim());
-                            cmd.Parameters.AddWithValue("@Nachname", tb_name.Text.Trim());
-                            cmd.Parameters.AddWithValue("@Geschlecht", cb_geschlecht.Text.Trim());
-                            cmd.Parameters.AddWithValue("@Email", tb_email.Text.Trim());
-                            cmd.Parameters.AddWithValue("@Geburtsdatum", dtp_geburtdatum.Value);
-                            cmd.Parameters.AddWithValue("@PLZ", tb_plz.Text.Trim());
-                            cmd.Parameters.AddWithValue("@Ort", tb_ort.Text.Trim());
-                            cmd.Parameters.AddWithValue("@Bundesland", cb_bundesland.Text.Trim());
-                            cmd.Parameters.AddWithValue("@Straße", tb_strasse.Text.Trim());
-                            cmd.Parameters.AddWithValue("@HausNr", tb_hausnr.Text.Trim());
-                            cmd.Parameters.AddWithValue("@Telefonnummer", tb_telefonnummer.Text.Trim());
-
-                            // Wichtig: wird nicht ohne das ID funkzionieren
-                            cmd.Parameters.AddWithValue("@ID", id);
-
-                            cmd.ExecuteNonQuery();
-                        }
-                    }
-                    LoadData();
-                    MessageBox.Show("Erfolgreich aktualisiert!");
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Fehler beim Aktualisieren:\n" + ex.Message);
-                }
+                LoadData();  // reload grid
             }
         }
         private void btn_loeschen_Click(object sender, EventArgs e)
@@ -668,8 +753,9 @@ namespace Praktikum_01
                                 MessageBoxButtons.YesNo) == DialogResult.Yes)
             {
                 DeletePerson(id);
-                LoadData();
                 MessageBox.Show("Eintrag gelöscht!");
+                btn_neu.PerformClick();
+                LoadData();
             }
         }
         // Bei einem Doppelklick auf ein Eintrag werden die Personendatenfelder automatisch befüllt
@@ -690,7 +776,17 @@ namespace Praktikum_01
             tb_name.Text = row.Cells["Nachname"].Value?.ToString();
             tb_vorname.Text = row.Cells["Vorname"].Value?.ToString();
             cb_geschlecht.Text = row.Cells["Geschlecht"].Value?.ToString();
-            dtp_geburtdatum.Text = row.Cells["Geburtsdatum"].Value?.ToString();
+            if (row.Cells["Geburtsdatum"].Value is DateTime dt)
+            { 
+                mtb_geburtstagdatum.TextMaskFormat = MaskFormat.ExcludePromptAndLiterals;
+                mtb_geburtstagdatum.Text = dt.ToString("ddMMyyyy");
+                mtb_geburtstagdatum.TextMaskFormat = MaskFormat.IncludePromptAndLiterals;
+            }
+            else
+            {
+                mtb_geburtstagdatum.Clear();
+            }
+
             tb_strasse.Text = row.Cells["Strasse"].Value?.ToString();
             tb_hausnr.Text = row.Cells["HausNr"].Value?.ToString();
             tb_plz.Text = row.Cells["PLZ"].Value?.ToString();
@@ -699,8 +795,12 @@ namespace Praktikum_01
             tb_email.Text = row.Cells["Email"].Value?.ToString();
             tb_telefonnummer.Text = row.Cells["Telefonnummer"].Value?.ToString();
             tb_suchen.Text = row.Cells["ID"].Value?.ToString();
+            DisableInputs();
+            btn_speichern.Text = "Aktualisieren";
+
         }
         // doppelclick um die daten in felder zu ueberschreiben
+        /*
         private void tb_DoubleClick(object sender, EventArgs e)
         {
             TextBox tb = sender as TextBox;
@@ -709,7 +809,7 @@ namespace Praktikum_01
                 string value = tb.Text;
                 dgv_Personnen.CurrentCell.Value = value;
             }
-        }
+        }*/
         // gleiche class aber fuer ComboBox
         private void cb_MouseDoubleClick(object sender, MouseEventArgs e)
         {
@@ -742,7 +842,7 @@ namespace Praktikum_01
             if (!char.IsDigit(e.KeyChar) && e.KeyChar != '+' && e.KeyChar != ' ' && e.KeyChar != '(' && e.KeyChar != ')')
                 e.Handled = true;
         }
-
+        /*
         private void dgv_Personnen_CellClick(object sender, DataGridViewCellEventArgs e)
         {
             // column headers
@@ -764,7 +864,7 @@ namespace Praktikum_01
 
             tb_suchen.Text = cell.ToString();
         }
-
+        */
         private void tb_name_KeyPress(object sender, KeyPressEventArgs e)
         { 
             if (char.IsControl(e.KeyChar))
@@ -779,21 +879,140 @@ namespace Praktikum_01
             e.Handled = true;
         }
 
-        private void dtp_geburtdatum_Enter(object sender, EventArgs e)
-        {
-            if (dtp_geburtdatum.CustomFormat == " ")
-                dtp_geburtdatum.CustomFormat = "dd.MM.yyyy";
-        }
-
-        private void dtp_geburtdatum_MouseDown(object sender, MouseEventArgs e)
-        {
-            if (dtp_geburtdatum.CustomFormat == " ")
-                dtp_geburtdatum.CustomFormat = "dd.MM.yyyy";
-        }
-
+        
+        
         private void btn_suchen_Click(object sender, EventArgs e)
         {
             Suchen();
         }
+
+        private void mtb_geburtstagdatum_KeyDown(object sender, KeyEventArgs e)
+        {
+            
+            bool numberPressed =
+                (e.KeyCode >= Keys.D0 && e.KeyCode <= Keys.D9) ||
+                (e.KeyCode >= Keys.NumPad0 && e.KeyCode <= Keys.NumPad9);
+
+            if (!numberPressed &&
+                e.KeyCode != Keys.Back &&
+                e.KeyCode != Keys.Left &&
+                e.KeyCode != Keys.Right)
+            {
+                e.SuppressKeyPress = true;
+            }
+        }
+        private void mtb_geburtstagdatum_Leave(object sender, EventArgs e)
+        {
+            if (mtb_geburtstagdatum.Text.Contains("_"))
+                return;
+
+            if (!DateTime.TryParseExact(
+                mtb_geburtstagdatum.Text,
+                "dd.MM.yyyy",
+                CultureInfo.InvariantCulture,
+                DateTimeStyles.None,
+                out _))
+            {
+                MessageBox.Show("Ungültiges Datum!", "Fehler", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                mtb_geburtstagdatum.Focus();
+            }
+
+        }
+        private string CleanDateText(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+                return "";
+
+            string digits = new string(text.Where(char.IsDigit).ToArray());
+
+            if (digits.Length != 8)
+                return "";
+
+            return digits.Insert(2, ".").Insert(5, ".");
+        }
+
+        private void ResetBirthdayCursor()
+        {
+            BeginInvoke(new Action(() =>
+            {
+                mtb_geburtstagdatum.SelectionStart = 0;
+            }));
+        }
+
+        private void mtb_geburtstagdatum_Enter(object sender, EventArgs e)
+        {
+            ResetBirthdayCursor();
+        }
+
+        private void mtb_geburtstagdatum_TextChanged(object sender, EventArgs e)
+        {
+            if (mtb_geburtstagdatum.Text.Contains("_"))
+            {
+                lbl_alterberechnen.Text = "";
+                return;
+            }
+
+            string text = mtb_geburtstagdatum.Text;
+
+            if (!DateTime.TryParseExact(
+                    text,
+                    "dd.MM.yyyy",
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.None,
+                    out DateTime geburtsdatum))
+            {
+                lbl_alterberechnen.Text = "";
+                return;
+            }
+
+            // Split: day, month, year
+            string[] matrix = new string[]
+            {
+                geburtsdatum.Day.ToString(),
+                geburtsdatum.Month.ToString(),
+                geburtsdatum.Year.ToString()
+            };
+
+            // Alter berechenen
+            int jahre = DateTime.Today.Year - Convert.ToInt32(matrix[2]);
+            int monate = DateTime.Today.Month - Convert.ToInt32(matrix[1]);
+            int tage = DateTime.Today.Day - Convert.ToInt32(matrix[0]);
+
+            if (tage < 0)
+            {
+                monate--;
+                tage += DateTime.DaysInMonth(geburtsdatum.Year, geburtsdatum.Month);
+            }
+
+            if (monate < 0)
+            {
+                jahre--;
+                monate += 12;
+            }
+
+            if (jahre > 100 || jahre < 0)
+            {
+                lbl_alterberechnen.BackColor = Color.Red;
+                lbl_alterberechnen.ForeColor = Color.White;
+                lbl_alterberechnen.Text = "Ungültige Eingabe!";
+            }
+            else if (jahre < 18)
+            {
+                lbl_alterberechnen.BackColor = Color.Yellow;
+                lbl_alterberechnen.ForeColor = Color.Black;
+                lbl_alterberechnen.Text = $"{jahre} Jahre {monate} Monate";
+            }
+            else
+            {
+                lbl_alterberechnen.BackColor = Color.Green;
+                lbl_alterberechnen.ForeColor = Color.White;
+                lbl_alterberechnen.Text = $"{jahre} Jahre {monate} Monate";
+            }
+
+            
+
+            
+        }
+
     }
 }
