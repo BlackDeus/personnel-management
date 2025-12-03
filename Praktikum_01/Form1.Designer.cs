@@ -67,10 +67,8 @@
             this.dgv_Personnen = new System.Windows.Forms.DataGridView();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.exportierenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.xLSXToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aktualisierenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panel2 = new System.Windows.Forms.Panel();
-            this.cSVToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgv_Personnen)).BeginInit();
             this.contextMenuStrip1.SuspendLayout();
@@ -498,28 +496,19 @@
             this.exportierenToolStripMenuItem,
             this.aktualisierenToolStripMenuItem});
             this.contextMenuStrip1.Name = "contextMenuStrip1";
-            this.contextMenuStrip1.Size = new System.Drawing.Size(181, 70);
+            this.contextMenuStrip1.Size = new System.Drawing.Size(143, 48);
             // 
             // exportierenToolStripMenuItem
             // 
-            this.exportierenToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.xLSXToolStripMenuItem,
-            this.cSVToolStripMenuItem});
             this.exportierenToolStripMenuItem.Name = "exportierenToolStripMenuItem";
-            this.exportierenToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.exportierenToolStripMenuItem.Size = new System.Drawing.Size(142, 22);
             this.exportierenToolStripMenuItem.Text = "Exportieren";
-            // 
-            // xLSXToolStripMenuItem
-            // 
-            this.xLSXToolStripMenuItem.Name = "xLSXToolStripMenuItem";
-            this.xLSXToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.xLSXToolStripMenuItem.Text = ".XSLX";
-            this.xLSXToolStripMenuItem.Click += new System.EventHandler(this.xLSXToolStripMenuItem_Click);
+            this.exportierenToolStripMenuItem.Click += new System.EventHandler(this.exportierenToolStripMenuItem_Click);
             // 
             // aktualisierenToolStripMenuItem
             // 
             this.aktualisierenToolStripMenuItem.Name = "aktualisierenToolStripMenuItem";
-            this.aktualisierenToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.aktualisierenToolStripMenuItem.Size = new System.Drawing.Size(142, 22);
             this.aktualisierenToolStripMenuItem.Text = "Aktualisieren";
             this.aktualisierenToolStripMenuItem.Click += new System.EventHandler(this.aktualisierenToolStripMenuItem_Click);
             // 
@@ -531,13 +520,6 @@
             this.panel2.Name = "panel2";
             this.panel2.Size = new System.Drawing.Size(971, 526);
             this.panel2.TabIndex = 30;
-            // 
-            // cSVToolStripMenuItem
-            // 
-            this.cSVToolStripMenuItem.Name = "cSVToolStripMenuItem";
-            this.cSVToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.cSVToolStripMenuItem.Text = "CSV";
-            this.cSVToolStripMenuItem.Click += new System.EventHandler(this.cSVToolStripMenuItem_Click_1);
             // 
             // Form1
             // 
@@ -599,8 +581,6 @@
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
         private System.Windows.Forms.ToolStripMenuItem aktualisierenToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exportierenToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem xLSXToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem cSVToolStripMenuItem;
     }
 }
 

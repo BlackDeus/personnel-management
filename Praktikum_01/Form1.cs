@@ -23,6 +23,9 @@ using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml;
 using Font = DocumentFormat.OpenXml.Spreadsheet.Font;
 using Text = DocumentFormat.OpenXml.Spreadsheet.Text;
+using MigraDoc.DocumentObjectModel;
+using MigraDoc.Rendering;
+using PdfSharp.Pdf;
 
 
 
@@ -680,78 +683,60 @@ namespace Praktikum_01
                 MessageBox.Show("Fehler beim Aktualisieren:\n" + ex.Message);
             }
         }
-        List<DataGridViewRow> GetRowsToExport(DataGridView grid)
+ 
+
+        public void export_pdf(DataGridView grid)
         {
-            // Wenn Nutzer ausgewählt eine oder mehrere Zeile => export nur diese
-            if (grid.SelectedRows.Count > 0)
+            DataGridViewRow row = grid.SelectedRows[0];
+
+            // Document erstellen
+            Document doc = new Document();
+            Section section = doc.AddSection();
+
+            section.PageSetup.LeftMargin = Unit.FromCentimeter(2);
+            section.PageSetup.RightMargin = Unit.FromCentimeter(2);
+            section.PageSetup.TopMargin = Unit.FromCentimeter(2);
+
+            // Titel
+            Paragraph title = section.AddParagraph("Personendaten");
+            title.Format.Font.Size = 32;
+            title.Format.Font.Bold = true;
+            title.Format.SpaceAfter = 10;
+
+            //Fügt jedes Feld als "Kopf: Wert" hinzu.
+            for (int i = 0; i < grid.Columns.Count; i++)
             {
-                return grid.SelectedRows
-                           .Cast<DataGridViewRow>()
-                           .OrderBy(r => r.Index)
-                           .ToList();
+                string header = grid.Columns[i].HeaderText;
+                string value;
+                if (row.Cells[i].Value is DateTime dt)
+                    value = dt.ToString("dd.MM.yyyy");
+                else
+                    value = row.Cells[i].Value?.ToString() ?? "";
+
+                Paragraph p = section.AddParagraph();
+                p.AddFormattedText(header + ": ", TextFormat.Bold);
+                p.AddText(value);
+                p.Format.SpaceAfter = 3;
+                p.Format.Font.Size = 20;
             }
 
-            // oder nur eine zeile exportieren
-            return grid.Rows
-                       .Cast<DataGridViewRow>()
-                       .Where(r => !r.IsNewRow)
-                       .ToList();
-        }
+            // Speichern zu temp file
+            string file = Path.Combine(Path.GetTempPath(),
+                "RowExport_" + Guid.NewGuid().ToString() + ".pdf");
 
-        void export_csv(string file, DataGridView grid)
-        {
-            string tempFile = Path.Combine(Path.GetTempPath(),
-                                           "grid_export_" + Guid.NewGuid().ToString() + ".csv");
-
-            var rowsToExport = GetRowsToExport(grid);
-
-            using (StreamWriter csv = new StreamWriter(tempFile, false, Encoding.UTF8))
+            PdfDocumentRenderer renderer = new PdfDocumentRenderer(true)
             {
-                // Kopf
-                List<string> headers = new List<string>();
-                foreach (DataGridViewColumn col in grid.Columns)
-                    headers.Add(EscapeCsv(col.HeaderText));
-                csv.WriteLine(string.Join(",", headers));
+                Document = doc
+            };
+            renderer.RenderDocument();
+            renderer.Save(file);
 
-                // Data Zeile (ausgewaehlte)
-                foreach (var row in rowsToExport)
-                {
-                    List<string> cells = new List<string>();
-                    foreach (DataGridViewCell cell in row.Cells)
-                        cells.Add(EscapeCsv(cell.Value?.ToString() ?? ""));
-                    csv.WriteLine(string.Join(",", cells));
-                }
-            }
-
-            string libreOfficePath = @"C:\Program Files\LibreOffice\program\scalc.exe";
-
-            if (File.Exists(libreOfficePath))
+            // Open PDF
+            Process.Start(new ProcessStartInfo()
             {
-                Process.Start(new ProcessStartInfo()
-                {
-                    FileName = libreOfficePath,
-                    Arguments = $"\"{tempFile}\"",
-                    UseShellExecute = false
-                });
-            }
-            else
-            {
-                Process.Start(new ProcessStartInfo()
-                {
-                    FileName = tempFile,
-                    UseShellExecute = true
-                });
-            }
-        }
-
-        // Fluchthelfer (',' != Zeilumbruch)
-        string EscapeCsv(string input)
-        {
-            if (input.Contains("\""))
-                input = input.Replace("\"", "\"\"");
-            if (input.Contains(",") || input.Contains("\n") || input.Contains("\r"))
-                input = $"\"{input}\"";
-            return input;
+                FileName = file,
+                UseShellExecute = true
+            });
         }
 
         public void export_xlsx(DataGridView grid)
@@ -800,7 +785,7 @@ namespace Praktikum_01
                         new Font(new Bold())   // 1 = fett
                     ),
                     new Fills(new Fill()),
-                    new Borders(new Border()),
+                    new DocumentFormat.OpenXml.Spreadsheet.Borders(new DocumentFormat.OpenXml.Spreadsheet.Border()),
                     new CellFormats(
                         new CellFormat(),                // 0 = normales
                         new CellFormat() { FontId = 1 }  // 1 = fett
@@ -832,7 +817,16 @@ namespace Praktikum_01
                 {
                     Row r = new Row();
                     foreach (DataGridViewCell cell in row.Cells)
-                        r.Append(CreateTextCell(cell.Value?.ToString() ?? ""));
+                    {
+                        string value;
+
+                        if (cell.Value is DateTime dt)
+                            value = dt.ToString("dd.MM.yyyy");
+                        else
+                            value = cell.Value?.ToString() ?? "";
+
+                        r.Append(CreateTextCell(value));
+                    }
                     sheetData.Append(r);
                 }
             }
@@ -1164,14 +1158,21 @@ namespace Praktikum_01
             LoadData();
         }
 
-        private void xLSXToolStripMenuItem_Click(object sender, EventArgs e)
+        private void exportierenToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            export_xlsx(dgv_Personnen);
-        }
-
-        private void cSVToolStripMenuItem_Click_1(object sender, EventArgs e)
-        {
-            export_csv("test", dgv_Personnen);
+            
+            if (dgv_Personnen.SelectedRows.Count == 1)
+            {
+                export_pdf(dgv_Personnen);
+            }
+            else if (dgv_Personnen.SelectedRows.Count > 1)
+            {
+                export_xlsx(dgv_Personnen);
+            }
+            else
+            {
+                MessageBox.Show("Keine Daten zum Exportieren vorhanden.");
+            }
         }
     }
 }
