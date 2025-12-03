@@ -67,13 +67,10 @@
             this.dgv_Personnen = new System.Windows.Forms.DataGridView();
             this.contextMenuStrip1 = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.exportierenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.xLSXToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aktualisierenToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panel2 = new System.Windows.Forms.Panel();
-            this.nurAusgewaehlteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.eCSVToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.eXLSXToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cSVToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.xLSXToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgv_Personnen)).BeginInit();
             this.contextMenuStrip1.SuspendLayout();
@@ -506,12 +503,18 @@
             // exportierenToolStripMenuItem
             // 
             this.exportierenToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.nurAusgewaehlteToolStripMenuItem,
-            this.cSVToolStripMenuItem,
-            this.xLSXToolStripMenuItem});
+            this.xLSXToolStripMenuItem,
+            this.cSVToolStripMenuItem});
             this.exportierenToolStripMenuItem.Name = "exportierenToolStripMenuItem";
             this.exportierenToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.exportierenToolStripMenuItem.Text = "Exportieren";
+            // 
+            // xLSXToolStripMenuItem
+            // 
+            this.xLSXToolStripMenuItem.Name = "xLSXToolStripMenuItem";
+            this.xLSXToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.xLSXToolStripMenuItem.Text = ".XSLX";
+            this.xLSXToolStripMenuItem.Click += new System.EventHandler(this.xLSXToolStripMenuItem_Click);
             // 
             // aktualisierenToolStripMenuItem
             // 
@@ -529,41 +532,12 @@
             this.panel2.Size = new System.Drawing.Size(971, 526);
             this.panel2.TabIndex = 30;
             // 
-            // nurAusgewaehlteToolStripMenuItem
-            // 
-            this.nurAusgewaehlteToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.eCSVToolStripMenuItem,
-            this.eXLSXToolStripMenuItem});
-            this.nurAusgewaehlteToolStripMenuItem.Name = "nurAusgewaehlteToolStripMenuItem";
-            this.nurAusgewaehlteToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.nurAusgewaehlteToolStripMenuItem.Text = "Nur ausgewaehlte";
-            // 
-            // eCSVToolStripMenuItem
-            // 
-            this.eCSVToolStripMenuItem.Name = "eCSVToolStripMenuItem";
-            this.eCSVToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.eCSVToolStripMenuItem.Text = "eCSV";
-            // 
-            // eXLSXToolStripMenuItem
-            // 
-            this.eXLSXToolStripMenuItem.Name = "eXLSXToolStripMenuItem";
-            this.eXLSXToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.eXLSXToolStripMenuItem.Text = "eXLSX";
-            this.eXLSXToolStripMenuItem.Click += new System.EventHandler(this.eXLSXToolStripMenuItem_Click);
-            // 
             // cSVToolStripMenuItem
             // 
             this.cSVToolStripMenuItem.Name = "cSVToolStripMenuItem";
             this.cSVToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.cSVToolStripMenuItem.Text = "CSV";
-            this.cSVToolStripMenuItem.Click += new System.EventHandler(this.cSVToolStripMenuItem_Click);
-            // 
-            // xLSXToolStripMenuItem
-            // 
-            this.xLSXToolStripMenuItem.Name = "xLSXToolStripMenuItem";
-            this.xLSXToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.xLSXToolStripMenuItem.Text = "XLSX";
-            this.xLSXToolStripMenuItem.Click += new System.EventHandler(this.xLSXToolStripMenuItem_Click);
+            this.cSVToolStripMenuItem.Click += new System.EventHandler(this.cSVToolStripMenuItem_Click_1);
             // 
             // Form1
             // 
@@ -625,11 +599,8 @@
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip1;
         private System.Windows.Forms.ToolStripMenuItem aktualisierenToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exportierenToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem nurAusgewaehlteToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem eCSVToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem eXLSXToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem cSVToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem xLSXToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem cSVToolStripMenuItem;
     }
 }
 

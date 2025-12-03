@@ -63,7 +63,8 @@ namespace Praktikum_01
 
             dgv_Personnen.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
             dgv_Personnen.MultiSelect = true;   // fuer multi zeile export
-            dgv_Personnen.RowHeadersVisible = false;
+            //dgv_Personnen.RowHeadersVisible = false;
+            dgv_Personnen.CurrentCell = null; ;
 
 
         }
@@ -293,7 +294,6 @@ namespace Praktikum_01
             // Altersberechnung
             int alter = DateTime.Today.Year - geburtsdatum.Year;
             if (geburtsdatum.Date > DateTime.Today.AddYears(-alter)) alter--;
-            lbl_alterberechnen.Text = Convert.ToString(alter);
 
             //Mindestalter 14
             return alter >= 18;
@@ -375,13 +375,12 @@ namespace Praktikum_01
             {
                 con.Open();
 
-                // Base query
+                // query
                 string sql = "SELECT * FROM Person WHERE 1=1 ";
 
                 SqlCommand cmd = new SqlCommand();
                 cmd.Connection = con;
 
-                // Only add filters when fields are not empty
                 if (!string.IsNullOrWhiteSpace(cb_anrede.Text))
                 {
                     sql += " AND Anrede = @Anrede";
@@ -444,7 +443,6 @@ namespace Praktikum_01
                     cmd.Parameters.AddWithValue("@Telefonnummer", tb_telefonnummer.Text.Trim());
                 }
 
-
                 cmd.CommandText = sql;
 
                 DataTable dt = new DataTable();
@@ -458,7 +456,7 @@ namespace Praktikum_01
             foreach (System.Windows.Forms.Control ctl in parent.Controls)
             {
                 if (ctl is TextBox tb)
-                        tb.Clear();        // or tb.Text = ""
+                        tb.Clear();        // oder tb.Text = ""
                 else
                     ClearTextBoxes(ctl);  // sucht drinn child containers
                 tb_suchen.Text = "0";
@@ -479,7 +477,7 @@ namespace Praktikum_01
                     ClearTextBoxes(ctl);  // sucht drinn child containers
             }
         }
-        private void btn_leeren_Click(object sender, EventArgs e) // hier leeren wir alle Daten 
+        private void btn_leeren_Click(object sender, EventArgs e) // hier leeren wir alle Daten, aus tb_suchen
         {
             isClearing = true;
             ClearTextBoxes(this);
@@ -682,32 +680,49 @@ namespace Praktikum_01
                 MessageBox.Show("Fehler beim Aktualisieren:\n" + ex.Message);
             }
         }
+        List<DataGridViewRow> GetRowsToExport(DataGridView grid)
+        {
+            // Wenn Nutzer ausgewählt eine oder mehrere Zeile => export nur diese
+            if (grid.SelectedRows.Count > 0)
+            {
+                return grid.SelectedRows
+                           .Cast<DataGridViewRow>()
+                           .OrderBy(r => r.Index)
+                           .ToList();
+            }
+
+            // oder nur eine zeile exportieren
+            return grid.Rows
+                       .Cast<DataGridViewRow>()
+                       .Where(r => !r.IsNewRow)
+                       .ToList();
+        }
 
         void export_csv(string file, DataGridView grid)
         {
-            // tempfile zu exportieren
-            string tempFile = Path.Combine(Path.GetTempPath(), "grid_export_" + Guid.NewGuid().ToString() + ".csv");
+            string tempFile = Path.Combine(Path.GetTempPath(),
+                                           "grid_export_" + Guid.NewGuid().ToString() + ".csv");
+
+            var rowsToExport = GetRowsToExport(grid);
 
             using (StreamWriter csv = new StreamWriter(tempFile, false, Encoding.UTF8))
             {
-                // Header Zeil
+                // Kopf
                 List<string> headers = new List<string>();
                 foreach (DataGridViewColumn col in grid.Columns)
                     headers.Add(EscapeCsv(col.HeaderText));
                 csv.WriteLine(string.Join(",", headers));
 
-                // Data Zeilen
-                foreach (DataGridViewRow row in grid.Rows)
+                // Data Zeile (ausgewaehlte)
+                foreach (var row in rowsToExport)
                 {
-                    if (row.IsNewRow) continue;
-
                     List<string> cells = new List<string>();
                     foreach (DataGridViewCell cell in row.Cells)
                         cells.Add(EscapeCsv(cell.Value?.ToString() ?? ""));
-
                     csv.WriteLine(string.Join(",", cells));
                 }
             }
+
             string libreOfficePath = @"C:\Program Files\LibreOffice\program\scalc.exe";
 
             if (File.Exists(libreOfficePath))
@@ -728,7 +743,8 @@ namespace Praktikum_01
                 });
             }
         }
-        // Fluchthelfer
+
+        // Fluchthelfer (',' != Zeilumbruch)
         string EscapeCsv(string input)
         {
             if (input.Contains("\""))
@@ -738,31 +754,35 @@ namespace Praktikum_01
             return input;
         }
 
-        public void export_xlsx(DataGridView grid, bool onlySelected)
+        public void export_xlsx(DataGridView grid)
         {
-            List<DataGridViewRow> rowsToExport = new List<DataGridViewRow>();
+            // Ermitteln, welche Zeilen exportiert werden sollen
+            List<DataGridViewRow> rowsToExport;
 
-            if (onlySelected)
+            if (grid.SelectedRows.Count > 0)
             {
-                if (grid.SelectedRows.Count == 0)
-                {
-                    MessageBox.Show("Bitte wählen Sie mindestens eine Zeile aus.");
-                    return;
-                }
-
-                // Add selected rows in display order
-                rowsToExport.AddRange(grid.SelectedRows.Cast<DataGridViewRow>().OrderBy(r => r.Index));
+                // Export nur ausgewaehlte Zeile 
+                rowsToExport = grid.SelectedRows
+                    .Cast<DataGridViewRow>()
+                    .OrderBy(r => r.Index)
+                    .ToList();
             }
             else
             {
-                // Add all rows except the "new" one
-                foreach (DataGridViewRow r in grid.Rows)
-                {
-                    if (!r.IsNewRow)
-                        rowsToExport.Add(r);
-                }
+                // Export ganze Tabelle
+                rowsToExport = grid.Rows
+                    .Cast<DataGridViewRow>()
+                    .Where(r => !r.IsNewRow)
+                    .ToList();
             }
 
+            if (rowsToExport.Count == 0)
+            {
+                MessageBox.Show("Keine Daten zum Exportieren vorhanden.");
+                return;
+            }
+
+            // temp .xlsx file
             string file = Path.Combine(Path.GetTempPath(),
                                        "Export_" + Guid.NewGuid() + ".xlsx");
 
@@ -772,15 +792,18 @@ namespace Praktikum_01
                 WorkbookPart wbPart = doc.AddWorkbookPart();
                 wbPart.Workbook = new Workbook();
 
-                // STYLES (bold header)
+                // Stylesheet (fett fuer Kopf)
                 WorkbookStylesPart styles = wbPart.AddNewPart<WorkbookStylesPart>();
                 styles.Stylesheet = new Stylesheet(
-                    new Fonts(new Font(), new Font(new Bold())),   // default + bold
+                    new Fonts(
+                        new Font(),            // 0 = normales
+                        new Font(new Bold())   // 1 = fett
+                    ),
                     new Fills(new Fill()),
                     new Borders(new Border()),
                     new CellFormats(
-                        new CellFormat(),                 // default
-                        new CellFormat() { FontId = 1 }   // bold
+                        new CellFormat(),                // 0 = normales
+                        new CellFormat() { FontId = 1 }  // 1 = fett
                     )
                 );
                 styles.Stylesheet.Save();
@@ -794,16 +817,17 @@ namespace Praktikum_01
                 {
                     Id = doc.WorkbookPart.GetIdOfPart(wsPart),
                     SheetId = 1,
-                    Name = onlySelected ? "Auswahl" : "Alle"
+                    Name = grid.SelectedRows.Count > 0 ? "Auswahl" : "Alle"
                 });
 
-                // HEADER ROW
+                // Kopfzeil FETT
                 Row header = new Row();
                 foreach (DataGridViewColumn col in grid.Columns)
                     header.Append(CreateTextCell(col.HeaderText, bold: true));
+
                 sheetData.Append(header);
 
-                // DATA ROWS
+                // Data Zeile
                 foreach (DataGridViewRow row in rowsToExport)
                 {
                     Row r = new Row();
@@ -812,16 +836,13 @@ namespace Praktikum_01
                     sheetData.Append(r);
                 }
             }
-
-            // OPEN AUTOMATICALLY
             Process.Start(new ProcessStartInfo()
             {
                 FileName = file,
                 UseShellExecute = true
             });
         }
-
-        /// Helper
+        /// Hilfer
         private Cell CreateTextCell(string text, bool bold = false)
         {
             Cell cell = new Cell
@@ -1143,18 +1164,14 @@ namespace Praktikum_01
             LoadData();
         }
 
-        private void cSVToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            export_csv("test", dgv_Personnen);
-        }
-
         private void xLSXToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            export_xlsx(dgv_Personnen, onlySelected: false);
+            export_xlsx(dgv_Personnen);
         }
-        private void eXLSXToolStripMenuItem_Click(object sender, EventArgs e)
+
+        private void cSVToolStripMenuItem_Click_1(object sender, EventArgs e)
         {
-            export_xlsx(dgv_Personnen, onlySelected: true);
+            export_csv("test", dgv_Personnen);
         }
     }
 }
