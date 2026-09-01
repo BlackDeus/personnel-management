@@ -24,7 +24,7 @@ Grundlegende Validation:
 Erweiterte Validation: 
 - E-Mail
   - Z.B. Prüfung auf @ und .
-- Telefonnummer !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+- Telefonnummer
   - Nur Zahleneingabe möglich (Regex) + Max. Länge von 10) 
 - Altersberechnung 
   - Label wird Rot wenn Alter <= 18 & >= 100 
